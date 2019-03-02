@@ -35,6 +35,7 @@ The `kexec` script (found in `kexec.nix`) will do the following:
 4. Fetch all your IP addresses and routes and put them into the initrd
 5. Pack the second initrd and append it to the default NixOS initrd from the emergency image
 6. `kexec` into the kernel from the emergency image while using the new initrd
+7. In case you didn't already notice: **This will crash your currently running system, so maybe it's a good idea to gracefully shut down remaining daemons if that's still possible**
 
 The script that is packed into the initrd of the new system will do the following:
 
