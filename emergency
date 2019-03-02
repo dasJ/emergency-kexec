@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+set -e
+set -u
+set -o pipefail
+
+[ -e result ] || nix-build '<nixpkgs/nixos>' -A config.system.build.kexec_tarball -I nixos-config=./configuration.nix -Q
+
+if [ "${#}" != 2 ]; then
+	(
+		echo "Usage: ${0} <connectTo> <useSudo>"
+		echo
+		echo 'connectTo is SSH connection string'
+		echo 'useSudo is 0 or 1 indicating whether sudo should be used'
+	) >&2
+	exit 1
+fi
+
+connectTo="${1}"
+useSudo="${2}"
+
+ssh="ssh ${connectTo}"
+if [ "${useSudo:-}" = 1 ]; then
+	ssh="${ssh} sudo"
+fi
+
+if ! ${ssh} echo Connection successful; then
+	echo "Connection cannot be established"
+	exit 1
+fi
+
+# Prepare tmpfs
+${ssh} mkdir -p /nix /tmp
+${ssh} mount -t tmpfs tmpfs /tmp
+${ssh} mkdir -p /tmp/work /tmp/nix
+
+# Copy and extract
+scp result/tarball/*.xz "${connectTo}:/tmp/emergency.tar.xz"
+${ssh} tar xf /tmp/emergency.tar.xz -C /tmp
+# Overlay the second /nix
+${ssh} mount -t overlay overlay -o lowerdir=/nix,upperdir=/tmp/nix,workdir=/tmp/work /nix
+# Here goes nothing
+${ssh} /tmp/kexec

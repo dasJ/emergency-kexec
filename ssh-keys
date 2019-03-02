@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+# Outputs all SSH user keys on the current system.
+
+while IFS= read -r home; do
+	[ -f "${home}/.ssh/authorized_keys" ] && cat "${home}/.ssh/authorized_keys"
+done < <(getent passwd | cut -d':' -f6 | sort | uniq)
+
+[ -d /etc/ssh/authorized_keys.d ] && find /etc/ssh/authorized_keys.d -type f -exec cat '{}' \;
