@@ -58,6 +58,6 @@ $ rm ./result
 If it doesn't work for you, I'm sorry.
 I can probably not help you, but if you're able to fix something, feel free to create a PR.
 
-The code is based on [clever's](https://github.com/cleverca22) kexec nix-test (found [here](https://github.com/cleverca22/nix-tests/tree/master/kexec).
+The code is based on [clever's](https://github.com/cleverca22) kexec nix-test (found [here](https://github.com/cleverca22/nix-tests/tree/master/kexec)).
 
-The code is licensed under the [GPL3](LICENSE).
+The code is licensed under the [LGPL3](LICENSE).
