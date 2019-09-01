@@ -11,7 +11,7 @@ if [ "${#}" != 1 ]; then
 	exit 1
 fi
 
-result="$(nix build --no-link -f '<nixpkgs/nixos>' -I nixos-config=./configuration.nix config.system.build.kexec_tarball)"
+nix build -f '<nixpkgs/nixos>' -I nixos-config=./configuration.nix config.system.build.kexec_tarball
 
 connectTo="${1}"
 ssh="ssh ${connectTo}"
@@ -27,7 +27,7 @@ ${ssh} mount -t tmpfs tmpfs /tmp
 ${ssh} mkdir -p /tmp/work /tmp/nix
 
 # Copy and extract
-rsync -P "${result}/tarball/"*.xz "${connectTo}:/tmp/emergency.tar.xz"
+rsync -P result/tarball/*.xz "${connectTo}:/tmp/emergency.tar.xz"
 ${ssh} tar xf /tmp/emergency.tar.xz -C /tmp
 # Overlay the second /nix
 ${ssh} mount -t overlay overlay -o lowerdir=/nix,upperdir=/tmp/nix,workdir=/tmp/work /nix
