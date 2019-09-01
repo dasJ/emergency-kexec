@@ -19,6 +19,7 @@
   # Packages
   environment.systemPackages = with pkgs; [
     gnufdisk
+    tmux
     vim
     xfsprogs.bin
   ];
