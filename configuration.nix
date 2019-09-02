@@ -41,6 +41,13 @@
   environment.variables.GC_INITIAL_HEAP_SIZE = "1M";
   boot.kernel.sysctl."vm.overcommit_memory" = "1";
 
+  # nix stuff
+  nix = {
+    buildCores = 0;
+    gc.automatic = false;
+  };
+  nixpkgs.config.allowUnfree = true;
+
   services.openssh = {
     enable = true;
     permitRootLogin = "without-password";
