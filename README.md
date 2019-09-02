@@ -30,7 +30,7 @@ The `emergency` script (found in the repository root) will SSH over and execute 
 The `kexec` script (found in `kexec.nix`) will do the following:
 
 1. Prepare a second initrd
-2. Put your SSH host key (`ed25519` only) into the initrd
+2. Put your SSH host keys into the initrd
 3. Put all of your SSH user keys into the initrd
 4. Fetch all your IP addresses and routes and put them into the initrd
 5. Pack the second initrd and append it to the default NixOS initrd from the emergency image

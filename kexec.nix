@@ -16,8 +16,9 @@
       cd $(mktemp -d)
       mkdir initrd
       pushd initrd
-      cat /etc/ssh/ssh_host_ed25519_key > ed25519_host_key
-      cat /etc/ssh/ssh_host_ed25519_key.pub > ed25519_host_key.pub
+      for i in /etc/ssh/ssh_host_*; do
+        cat "$i" > "$(basename "$i")"
+      done        
       ${./ip-to-ip} > ip-script
       ${./ssh-keys} > ssh-keys 2>&1
       chmod 755 ip-script
@@ -33,8 +34,9 @@
   boot.initrd.postMountCommands = ''
     mkdir -p /mnt-root/etc/ssh /mnt-root/root/.ssh
     umask 077
-    cat /ed25519_host_key > /mnt-root/etc/ssh/ssh_host_ed25519_key
-    cat /ed25519_host_key.pub > /mnt-root/etc/ssh/ssh_host_ed25519_key.pub
+    for i in /ssh_host_*; do
+      cat "$i" > /mnt-root/etc/ssh/"$i"
+    done
     cat /ssh-keys > /mnt-root/root/.ssh/authorized_keys
     cat /ip-script > /mnt-root/kexec-ips
   '';
