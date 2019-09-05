@@ -46,12 +46,9 @@ The script that is packed into the initrd of the new system will do the followin
 ## How to use
 
 ```
-$ ./emergency root@somehost 0
+$ ./emergency root@somehost
 # or
-$ ./emergency somebody@somehost 1
-
-# To force an image rebuild:
-$ rm ./result
+$ ./emergency somebody@somehost
 ```
 
 ## Disclaimer and license
