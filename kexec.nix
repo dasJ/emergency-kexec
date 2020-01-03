@@ -1,12 +1,15 @@
 { config, pkgs, ... }: {
   system.build = rec {
-    image = pkgs.runCommand "image" { buildInputs = [ pkgs.nukeReferences ]; } ''
-      mkdir "$out"
-      cp "${config.system.build.kernel}/bzImage" "$out/kernel"
-      cp "${config.system.build.netbootRamdisk}/initrd" "$out/initrd"
-      echo "init=${builtins.unsafeDiscardStringContext config.system.build.toplevel}/init ${toString config.boot.kernelParams}" > "$out/cmdline"
-      nuke-refs "$out/kernel"
-    '';
+    image =
+      pkgs.runCommand "image" { buildInputs = [ pkgs.nukeReferences ]; } ''
+        mkdir "$out"
+        cp "${config.system.build.kernel}/bzImage" "$out/kernel"
+        cp "${config.system.build.netbootRamdisk}/initrd" "$out/initrd"
+        echo "init=${
+          builtins.unsafeDiscardStringContext config.system.build.toplevel
+        }/init ${toString config.boot.kernelParams}" > "$out/cmdline"
+        nuke-refs "$out/kernel"
+      '';
 
     kexecScript = pkgs.writeScript "kexec-nixos" ''
       #!${pkgs.stdenv.shell}
@@ -18,7 +21,7 @@
       pushd initrd
       for i in /etc/ssh/ssh_host_*; do
         cat "$i" > "$(basename "$i")"
-      done        
+      done
       ${./ip-to-ip} > ip-script
       ${./ssh-keys} > ssh-keys 2>&1
       chmod 755 ip-script
@@ -26,7 +29,9 @@
       popd
       cat "${image}/initrd" extra.gz > final.gz
 
-      kexec -l "${image}/kernel" --initrd=final.gz --append="init=${builtins.unsafeDiscardStringContext config.system.build.toplevel}/init ${toString config.boot.kernelParams}"
+      kexec -l "${image}/kernel" --initrd=final.gz --append="init=${
+        builtins.unsafeDiscardStringContext config.system.build.toplevel
+      }/init ${toString config.boot.kernelParams}"
       systemd-run --on-active=2 --timer-property=AccuracySec=100ms $(which kexec) -e
     '';
   };
@@ -46,10 +51,12 @@
     . /kexec-ips
   '';
 
-  system.build.kexec_tarball = pkgs.callPackage <nixpkgs/nixos/lib/make-system-tarball.nix> {
-    storeContents = [
-      { object = config.system.build.kexecScript; symlink = "/kexec"; }
-    ];
-    contents = [];
-  };
+  system.build.kexec_tarball =
+    pkgs.callPackage <nixpkgs/nixos/lib/make-system-tarball.nix> {
+      storeContents = [{
+        object = config.system.build.kexecScript;
+        symlink = "/kexec";
+      }];
+      contents = [ ];
+    };
 }

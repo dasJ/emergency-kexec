@@ -1,4 +1,5 @@
-{ config, lib, pkgs, ... }: with lib; {
+{ config, lib, pkgs, ... }:
+with lib; {
   imports = [
     <nixpkgs/nixos/modules/profiles/minimal.nix>
     <nixpkgs/nixos/modules/profiles/all-hardware.nix>
@@ -17,16 +18,20 @@
   users.users.root.initialHashedPassword = "";
 
   # Packages
-  environment.systemPackages = with pkgs; [
-    gnufdisk
-    tmux
-    vim
-    xfsprogs.bin
-  ];
+  environment.systemPackages = with pkgs; [ gnufdisk tmux vim xfsprogs.bin ];
 
   # Kernel stuff
   hardware.enableRedistributableFirmware = true;
-  boot.initrd.availableKernelModules = [ "ata_piix" "uhci_hcd" "ehci_pci" "ahci" "virtio_pci" "sd_mod" "sr_mod" "virtio_blk" ];
+  boot.initrd.availableKernelModules = [
+    "ata_piix"
+    "uhci_hcd"
+    "ehci_pci"
+    "ahci"
+    "virtio_pci"
+    "sd_mod"
+    "sr_mod"
+    "virtio_blk"
+  ];
 
   # Filesystems
   boot.supportedFilesystems = [ "vfat" "xfs" "btrfs" ];
@@ -51,6 +56,6 @@
   services.openssh = {
     enable = true;
     permitRootLogin = "without-password";
-    hostKeys = []; # We will take the keys of the old system
+    hostKeys = [ ]; # We will take the keys of the old system
   };
 }
