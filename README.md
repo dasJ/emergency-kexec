@@ -17,11 +17,11 @@ It recovers all IP addresses as well as SSH host and user keys from the old syst
 
 The `emergency` script (found in the repository root) will SSH over and execute the following things:
 
-1. Build the recovery image (a `.tar.xz` with a small nix store and a `kexec` script) from the files in this repository
+1. Build the recovery image (a `.tar.xz` with a small nix store and a `kexec` script) from the files in this repository locally on the machine you're executing this code on
 	1. The system configuration is found in `configuration.nix`
 	2. Some `kexec`-related features are imported from `kexec.nix`
 	3. The scripts will be included to be used in the `kexec` script (see below)
-2. Try to `mkdir` `/nix` and `/tmp`. If the don't already exist and your root fs is read-only, you have a problem
+2. Try to `mkdir` `/nix` and `/tmp`. If the don't already exist and your root fs is read-only, you have a problem this project can't fix
 3. Mount a fresh `tmpfs` on `/tmp` because there might not be one already
 4. `scp` the emergency image over and extract it
 5. Mount the nix store from the emergency image over `/nix` using `overlayfs`
