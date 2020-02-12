@@ -11,10 +11,27 @@ if [ "${#}" != 1 ]; then
 	exit 1
 fi
 
-nix build -f '<nixpkgs/nixos>' -I nixos-config=./configuration.nix config.system.build.kexec_tarball
+#####
+# Variables
+#####
 
 connectTo="${1}"
-ssh="ssh ${connectTo}"
+
+sshDir="/run/user/$(id -u)/helsinki-ssh"
+# shellcheck disable=SC2174
+mkdir -m 0700 -p "${sshDir}"
+sshFlags=(-o 'ControlMaster=auto' -o "ControlPath=${sshDir}/%r@%h:%p" -o 'ControlPersist=1h' "${connectTo}")
+ssh="ssh ${connectTo} ${sshFlags[*]}"
+
+#####
+# kexec image
+#####
+
+nix build -f '<nixpkgs/nixos>' -I nixos-config=./configuration.nix config.system.build.kexec_tarball
+
+#####
+# Test connection and prepare
+#####
 
 if ! ${ssh} echo Connection successful; then
 	echo "Connection cannot be established"
@@ -33,3 +50,4 @@ ${ssh} tar xf /tmp/emergency.tar.xz -C /tmp
 ${ssh} mount -t overlay overlay -o lowerdir=/nix,upperdir=/tmp/nix,workdir=/tmp/work /nix
 # Here goes nothing
 ${ssh} /tmp/kexec
+${ssh} -O exit
