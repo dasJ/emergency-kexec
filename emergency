@@ -38,7 +38,7 @@ if ! ${ssh} echo Connection successful; then
 	exit 1
 fi
 
-# Prepare tmpfs
+${ssh} apt install rsync || :
 ${ssh} mkdir -p /nix /tmp
 ${ssh} mount -t tmpfs tmpfs /tmp
 ${ssh} mkdir -p /tmp/work /tmp/nix
