@@ -51,3 +51,15 @@ ${ssh} mount -t overlay overlay -o lowerdir=/nix,upperdir=/tmp/nix,workdir=/tmp/
 # Here goes nothing
 ${ssh} /tmp/kexec
 ${ssh} -O exit
+
+#####
+# Wait for SSH to be available again
+#####
+
+sleep 10 # Ensure the old system is already shut down
+echo -n "Attempting to connect..."
+while ! ${ssh} echo Connection successful; do
+	sleep 5
+	echo -n "."
+done
+echo
