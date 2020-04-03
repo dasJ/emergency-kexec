@@ -22,12 +22,13 @@ sshDir="/run/user/$(id -u)/helsinki-ssh"
 mkdir -m 0700 -p "${sshDir}"
 sshFlags=(-o 'ControlMaster=auto' -o "ControlPath=${sshDir}/%r@%h:%p" -o 'ControlPersist=1h')
 ssh="ssh ${connectTo} ${sshFlags[*]}"
+myDir="$(dirname "${0}")"
 
 #####
 # kexec image
 #####
 
-nix build -f '<nixpkgs/nixos>' -I nixos-config=./configuration.nix config.system.build.kexec_tarball
+nix build -f '<nixpkgs/nixos>' -I nixos-config="${myDir}/configuration.nix" config.system.build.kexec_tarball
 
 #####
 # Test connection and prepare
@@ -48,9 +49,9 @@ ${ssh} mkdir -p /tmp/work /tmp/nix
 #####
 
 # Serialize the current network state
-ips="$(${ssh} ip a | awk -f ips.awk)"
-routes="$(${ssh} ip r | awk -f routes.awk
-${ssh} ip -6 r | awk -f routes.awk)"
+ips="$(${ssh} ip a | awk -f "${myDir}/ips.awk")"
+routes="$(${ssh} ip r | awk -f "${myDir}/routes.awk"
+${ssh} ip -6 r | awk -f "${myDir}/routes.awk")"
 nameservers="$(${ssh} grep ^nameserver /etc/resolv.conf | cut -d' ' -f2)"
 # Handle systemd-resolved
 nameservers="${nameservers/127.0.0.53/1.1.1.1}"
