@@ -43,6 +43,8 @@ The script that is packed into the initrd of the new system will do the followin
 2. Place the SSH user keys
 3. Place a script for the IP addresses which will be executed using `networking.localCommands` so the interfaces are available
 
+If you set the environment variable `EMERGENCY_DUMP_NETWORK` to `1`, all IPs, routes, and nameservers will be placed in the `emergency_ips`, `emergency_routes`, and `emergency_nameservers` files, respectively.
+
 ## How to use
 
 ```

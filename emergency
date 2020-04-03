@@ -20,7 +20,7 @@ connectTo="${1}"
 sshDir="/run/user/$(id -u)/helsinki-ssh"
 # shellcheck disable=SC2174
 mkdir -m 0700 -p "${sshDir}"
-sshFlags=(-o 'ControlMaster=auto' -o "ControlPath=${sshDir}/%r@%h:%p" -o 'ControlPersist=1h' "${connectTo}")
+sshFlags=(-o 'ControlMaster=auto' -o "ControlPath=${sshDir}/%r@%h:%p" -o 'ControlPersist=1h')
 ssh="ssh ${connectTo} ${sshFlags[*]}"
 
 #####
@@ -42,6 +42,61 @@ ${ssh} apt install rsync || :
 ${ssh} mkdir -p /nix /tmp
 ${ssh} mount -t tmpfs tmpfs /tmp
 ${ssh} mkdir -p /tmp/work /tmp/nix
+
+#####
+# Networking
+#####
+
+# Serialize the current network state
+ips="$(${ssh} ip a | awk -f ips.awk)"
+routes="$(${ssh} ip r | awk -f routes.awk
+${ssh} ip -6 r | awk -f routes.awk)"
+nameservers="$(${ssh} grep ^nameserver /etc/resolv.conf | cut -d' ' -f2)"
+# Handle systemd-resolved
+nameservers="${nameservers/127.0.0.53/1.1.1.1}"
+
+# Dump the network state if desired
+if [ "${EMERGENCY_DUMP_NETWORK:-}" = 1 ]; then
+	echo "$ips" > emergency_ips
+	echo "$routes" > emergency_routes
+	echo "$nameservers" > emergency_nameservers
+fi
+
+# Deserialize the network state
+{
+	# Do not set -e here which would fail if interfaces (e.g. VPN) are missing.
+	echo "set -x"
+
+	# IPs
+	while IFS=";" read -r interface interfaceIps; do
+		echo "ip l set ${interface} up"
+		for ip in $(echo "${interfaceIps}" | tr ';' '\n'); do
+			echo "ip a a ${ip} dev ${interface}"
+		done
+	done < <(echo "${ips}")
+
+	# Routes
+	allRoutes="$(while IFS=';' read -r net via dev; do
+		echo -n "ip r a $net"
+		[ -n "${via:-}" ] && echo -n " via ${via}"
+		[ -n "${dev:-}" ] && echo -n " dev ${dev}"
+		echo
+	done < <(echo "${routes}"))"
+	# Output per-link routes first
+	echo "${allRoutes}" | grep -v via
+	echo "${allRoutes}" | grep via
+
+	# Nameservers
+	echo '('
+	while IFS= read -r ns; do
+		echo "echo 'nameserver ${ns}'"
+	done < <(echo "${nameservers}")
+	echo ') > /etc/resolv.conf'
+} | ${ssh} tee /tmp/ip-script > /dev/null
+
+#####
+# kexec
+#####
 
 # Copy and extract
 rsync -P result/tarball/*.xz "${connectTo}:/tmp/emergency.tar.xz"

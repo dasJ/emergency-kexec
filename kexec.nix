@@ -22,7 +22,7 @@
       for i in /etc/ssh/ssh_host_*; do
         cat "$i" > "$(basename "$i")"
       done
-      ${./ip-to-ip} > ip-script
+      mv /tmp/ip-script .
       ${./ssh-keys} > ssh-keys 2>&1
       chmod 755 ip-script
       find -type f | cpio -o -H newc | gzip -9 > ../extra.gz
@@ -44,11 +44,12 @@
     done
     cat /ssh-keys > /mnt-root/root/.ssh/authorized_keys
     cat /ip-script > /mnt-root/kexec-ips
+    chmod +x /mnt-root/kexec-ips
   '';
 
   networking.localCommands = ''
     export PATH="${pkgs.iproute}/bin:$PATH"
-    . /kexec-ips
+    /kexec-ips
   '';
 
   system.build.kexec_tarball =
