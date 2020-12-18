@@ -41,6 +41,9 @@ with lib; {
 
   # Hostname
   networking.hostName = "emergency";
+  networking.dhcpcd.extraConfig = ''
+    noipv4ll
+  '';
 
   # Perform better with low-memory
   environment.variables.GC_INITIAL_HEAP_SIZE = "1M";
