@@ -38,6 +38,10 @@ if ! ${ssh} echo Connection successful; then
 	echo "Connection cannot be established"
 	exit 1
 fi
+if ! ${ssh} zgrep CONFIG_KEXEC=y /proc/config.gz; then
+	echo "Target system lacks kexec capabilities"
+	exit 1
+fi
 
 ${ssh} apt install rsync || :
 ${ssh} mkdir -p /nix /tmp
