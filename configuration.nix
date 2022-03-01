@@ -14,7 +14,7 @@ with lib; {
   networking.firewall.logRefusedConnections = false;
 
   # User stuff
-  services.mingetty.autologinUser = "root";
+  services.getty.autologinUser = "root";
   users.users.root.initialHashedPassword = "";
 
   # Packages
